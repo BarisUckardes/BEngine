@@ -38,5 +38,11 @@
   <ItemGroup>
     <Compile Include="ProgramEntryPoint.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BEngine\BEngine.csproj">
+      <Project>{dc36662f-1cb4-4f11-9f71-a2091d6c9291}</Project>
+      <Name>BEngine</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
