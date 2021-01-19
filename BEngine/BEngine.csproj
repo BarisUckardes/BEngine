@@ -40,7 +40,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Presentation\BWindow.cs" />
+    <Compile Include="Engine\BEngineMonitor.cs" />
+    <Compile Include="Engine\BObject.cs" />
+    <Compile Include="Engine\IEngineModule.cs" />
     <Compile Include="Engine\Mathematics\BVector2.cs" />
+    <Compile Include="Engine\Mathematics\BVector3.cs" />
     <Compile Include="program.cs" />
   </ItemGroup>
   <ItemGroup>

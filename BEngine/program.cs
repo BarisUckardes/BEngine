@@ -1,5 +1,6 @@
 ﻿using BEngine.Core.Presentation;
 using BEngine.Engine.Mathematics;
+using BEngine.Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace BEngine
     {
         static int Main()
         {
+            BEngineMonitor engineMonitor;
             BWindow bWindow = new BWindow(new BVector2(512,512));
             Sdl2Window window = bWindow.GetWindow();
 
