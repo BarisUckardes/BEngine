@@ -8,6 +8,7 @@ namespace BEngine.Engine
 {
     public interface IEngineModule
     {
-
+        string ModuleName { get; }
+        void Run();
     }
 }

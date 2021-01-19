@@ -40,8 +40,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Presentation\BWindow.cs" />
+    <Compile Include="Core\Presentation\FrameWindow\FrameWindow.cs" />
+    <Compile Include="Core\Presentation\WindowModule.cs" />
     <Compile Include="Engine\BEngineMonitor.cs" />
     <Compile Include="Engine\BObject.cs" />
+    <Compile Include="Engine\FelinRenderer\FelineRenderer.cs" />
+    <Compile Include="Engine\Graphics\RenderingModule.cs" />
     <Compile Include="Engine\IEngineModule.cs" />
     <Compile Include="Engine\Mathematics\BVector2.cs" />
     <Compile Include="Engine\Mathematics\BVector3.cs" />
