@@ -11,8 +11,14 @@ namespace BEngine.Engine.Graphics
         public abstract string ModuleName{get;}
 
         public abstract void InitRenderingModule(GraphicsDevice targetDevice);
-
+        public abstract void RegisterSpectrumObserver(BSpectrumRenderer targetRenderer);
         public abstract void Run();
+
+        public abstract void CreateRenderingMesh(BMesh targetMesh);
+
+        public abstract void CreateRenderingMaterial(BMaterial targetMaterial);
+
+        public abstract void CreateRenderingPipeline(BSpectrumRenderer targetObserver);
       
     }
 }

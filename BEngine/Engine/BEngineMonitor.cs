@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BEngine.Core.ConsoleDebug;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,7 @@ namespace BEngine.Engine
         /// <typeparam name="T">Target module type</typeparam>
         public void RegisterModule<T>() where T :IEngineModule,new()
         {
-            Console.WriteLine("Module Registration : ["+typeof(T).Name+"]");
+            BConsoleLog.DropLog("Module Registration : [" + typeof(T).Name + "]",LogType.Verbose);
             RegisteredModules.Add(new T());
         }
 

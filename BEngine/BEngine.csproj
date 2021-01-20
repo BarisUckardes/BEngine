@@ -39,12 +39,20 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\ConsoleDebug\ConsoleLog.cs" />
+    <Compile Include="Core\ConsoleDebug\LogType.cs" />
+    <Compile Include="Core\IO\BMeshFileUtility.cs" />
+    <Compile Include="Core\IO\BShaderFileUtility.cs" />
     <Compile Include="Core\Presentation\BWindow.cs" />
     <Compile Include="Core\Presentation\FrameWindow\FrameWindow.cs" />
     <Compile Include="Core\Presentation\WindowModule.cs" />
     <Compile Include="Engine\BEngineMonitor.cs" />
     <Compile Include="Engine\BObject.cs" />
     <Compile Include="Engine\FelinRenderer\FelineRenderer.cs" />
+    <Compile Include="Engine\Graphics\BMaterial.cs" />
+    <Compile Include="Engine\Graphics\BMesh.cs" />
+    <Compile Include="Engine\Graphics\BSpectrumObserver.cs" />
+    <Compile Include="Engine\Graphics\BVertex.cs" />
     <Compile Include="Engine\Graphics\RenderingModule.cs" />
     <Compile Include="Engine\IEngineModule.cs" />
     <Compile Include="Engine\Mathematics\BVector2.cs" />
@@ -231,6 +239,9 @@
     <Reference Include="Veldrid.SDL2, Version=4.8.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Veldrid.SDL2.4.8.0\lib\netstandard2.0\Veldrid.SDL2.dll</HintPath>
     </Reference>
+    <Reference Include="Veldrid.SPIRV, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Veldrid.SPIRV.1.0.13\lib\netstandard2.0\Veldrid.SPIRV.dll</HintPath>
+    </Reference>
     <Reference Include="Veldrid.StartupUtilities, Version=4.8.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Veldrid.StartupUtilities.4.8.0\lib\netstandard2.0\Veldrid.StartupUtilities.dll</HintPath>
     </Reference>
@@ -245,5 +256,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Veldrid.SDL2.4.8.0\build\net40\Veldrid.SDL2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Veldrid.SDL2.4.8.0\build\net40\Veldrid.SDL2.targets'))" />
+    <Error Condition="!Exists('..\packages\Veldrid.SPIRV.1.0.13\build\net40\Veldrid.SPIRV.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Veldrid.SPIRV.1.0.13\build\net40\Veldrid.SPIRV.targets'))" />
   </Target>
+  <Import Project="..\packages\Veldrid.SPIRV.1.0.13\build\net40\Veldrid.SPIRV.targets" Condition="Exists('..\packages\Veldrid.SPIRV.1.0.13\build\net40\Veldrid.SPIRV.targets')" />
 </Project>
