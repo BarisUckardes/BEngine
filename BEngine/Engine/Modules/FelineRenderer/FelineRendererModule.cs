@@ -1,14 +1,16 @@
 ﻿using BEngine.Core.ConsoleDebug;
 using BEngine.Engine.Graphics;
+using BEngine.Engine.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
 using Veldrid.SPIRV;
 
-namespace BEngine.Engine.Modules
+namespace BEngine.Engine.Modules.FelineRenderer
 {
     internal class FelineRendererModule : RenderingModule
     {
@@ -39,20 +41,66 @@ namespace BEngine.Engine.Modules
         /// <summary>
         /// Renders the target world
         /// </summary>
+        float b = 0;
         public override void RenderPragma()
         {
-
             targetCommandList.Begin();
             targetCommandList.SetFramebuffer(targetDevice.SwapchainFramebuffer);
             targetCommandList.ClearColorTarget(0, RgbaFloat.Blue);
 
+            /*
+             * Loop through every registered renderers
+             */
             for(int i=0;i< registeredRenderers.Count;i++)
             {
-                targetCommandList.SetVertexBuffer(0, registeredRenderers[i].targetMesh.targetVertexBuffer);
-                targetCommandList.SetIndexBuffer(registeredRenderers[i].targetMesh.targetIndexBuffer,IndexFormat.UInt32);
-                targetCommandList.SetPipeline(registeredRenderers[i].targetPipeline);
+                BSpectrumRenderer targetRenderer = registeredRenderers[i];
+                BSpatial targetSpatial = targetRenderer.TargetSpatial;
+                targetSpatial.Rotation = new BVector3(0,b,0);
+                b+=0.001f;
+                /*
+                 * Check if this renderable needs his spatial buffer to be updated
+                 */
+                if (targetSpatial.IsDirty)
+                {
+                    
+                    targetSpatial.ModelMatrix =
+                        Matrix4x4.CreateRotationX(targetSpatial.Rotation.x)*
+                        Matrix4x4.CreateRotationY(targetSpatial.Rotation.y)*
+                        Matrix4x4.CreateRotationZ(targetSpatial.Rotation.z)*
+                        Matrix4x4.CreateScale(targetSpatial.Scale.x,targetSpatial.Scale.y,targetSpatial.Scale.z)*
+                        Matrix4x4.CreateTranslation(targetSpatial.Position.x,targetSpatial.Position.y,targetSpatial.Position.z);
+
+                    Matrix4x4 projectionMatrix =
+                    Matrix4x4.CreatePerspectiveFieldOfView(
+                      1.0f,
+                      1.0f,
+                      0.001f,
+                      100000.0f
+                     );
+                    Matrix4x4 viewMatrix =
+                        Matrix4x4.CreateLookAt(
+                            new Vector3(0, 0, 5),
+                            new Vector3(0, 0, 0),
+                            new Vector3(0, 1, 0)
+                    );
+
+                    Matrix4x4 MVP = targetSpatial.ModelMatrix * viewMatrix * projectionMatrix;
+                    targetDevice.UpdateBuffer(targetRenderer.targetMVPBuffer.targetDeviceBuffer, 0, MVP);
+
+                    targetSpatial.IsDirty = false;
+                }
+
+                
+                targetCommandList.SetPipeline(targetRenderer.targetPipeline);
+
+                targetCommandList.SetGraphicsResourceSet(0, targetRenderer.targetMVPBuffer.targetResourceSet);
+
+   
+                targetCommandList.SetVertexBuffer(0, targetRenderer.targetMesh.targetVertexBuffer);
+                targetCommandList.SetIndexBuffer(targetRenderer.targetMesh.targetIndexBuffer,IndexFormat.UInt32);
+                targetCommandList.SetPipeline(targetRenderer.targetPipeline);
                 targetCommandList.DrawIndexed(
-                    indexCount : (uint)registeredRenderers[i].targetMesh.Indexes.Length,
+                    indexCount : (uint)targetRenderer.targetMesh.Indexes.Length,
                     instanceCount : 1,
                     indexStart : 0,
                     vertexOffset : 0,
@@ -125,7 +173,7 @@ namespace BEngine.Engine.Modules
                 );
 
             gpDescription.RasterizerState = new RasterizerStateDescription(
-                cullMode : FaceCullMode.Back,
+                cullMode : FaceCullMode.None,
                 fillMode : PolygonFillMode.Solid,
                 frontFace : FrontFace.Clockwise,
                 depthClipEnabled : true,
@@ -142,7 +190,8 @@ namespace BEngine.Engine.Modules
 
             gpDescription.Outputs = targetDevice.SwapchainFramebuffer.OutputDescription;
 
-          
+            gpDescription.ResourceLayouts = new ResourceLayout[] { targetObserver.targetMVPBuffer.targetLayout};
+            
             Pipeline pipeline = targetResourceFactory.CreateGraphicsPipeline(gpDescription);
 
             targetObserver.targetPipeline = pipeline;
@@ -150,11 +199,46 @@ namespace BEngine.Engine.Modules
         }
 
         /// <summary>
-        /// Registers renderable
+        /// Registers renderable for the first time
         /// </summary>
         /// <param name="targetRenderer">target renderable object</param>
         public override void RegisterSpectrumRenderer(BSpectrumRenderer targetRenderer)
         {
+            /*
+             * Create MVP buffer (DeviceBuffer,ResourceLayout,ResourceSet)
+             */
+            BufferDescription mvpBufferDescription = new BufferDescription()
+            {
+                Usage = BufferUsage.UniformBuffer,
+                SizeInBytes = 64
+            };
+
+            DeviceBuffer mvpDeviceBuffer = targetResourceFactory.CreateBuffer(mvpBufferDescription);
+
+            ResourceLayoutElementDescription mvpLayout = new ResourceLayoutElementDescription()
+            {
+                Kind = ResourceKind.UniformBuffer,
+                Stages = ShaderStages.Vertex,
+                Name = "spatial_mvp"
+            };
+
+            ResourceLayoutElementDescription[] ar = new ResourceLayoutElementDescription[1];
+            ar[0] = mvpLayout;
+
+            ResourceLayoutDescription resourceLayout = new ResourceLayoutDescription()
+            {
+                Elements = ar
+            };
+
+            ResourceLayout rLayout = targetResourceFactory.CreateResourceLayout(resourceLayout);
+            ResourceSet rSet = targetResourceFactory.CreateResourceSet(new ResourceSetDescription(rLayout, mvpDeviceBuffer));
+            rLayout.Name = "MVP Buffer";
+            rSet.Name = "MVP Buffer";
+
+            BUniformBuffer mvpBuffer = new BUniformBuffer(mvpDeviceBuffer, rLayout,rSet);
+
+            targetRenderer.targetMVPBuffer = mvpBuffer;
+
             registeredRenderers.Add(targetRenderer);
         }
      

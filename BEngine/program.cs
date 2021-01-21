@@ -11,6 +11,7 @@ using Veldrid;
 using Veldrid.Sdl2;
 using BEngine.Engine.Graphics;
 using BEngine.Engine.Modules;
+using BEngine.Engine.Modules.FelineRenderer;
 
 namespace BEngine
 {
@@ -31,31 +32,34 @@ namespace BEngine
             RenderingModule targetRendererModule = engineMonitor.GetEngineModule<RenderingModule>();
             WindowModule targetWindowModule = engineMonitor.GetEngineModule<WindowModule>();
             WorldModule targetWorldModule = engineMonitor.GetEngineModule<WorldModule>();
-
+            
             targetRendererModule.InitRenderingModule(bWindow.GetDevice());
             targetWindowModule.InitWindowModule(window);
+
+            BWorld world = new BWorld("My B World");
 
             string vertexShader = BShaderFileUtility.LoadShaderFile(@"D:\BEngine\Shaders\TestVertexShader.bvs");
             string fragmentShader = BShaderFileUtility.LoadShaderFile(@"D:\BEngine\Shaders\TestFragmentShader.bfs");
 
             BMesh mesh = BMeshFileUtility.LoadFileVertexes(@"D:\BEngine\Shaders\TestMesh.bmesh");
-
             BMaterial material = new BMaterial(vertexShader,fragmentShader);
 
-            BSpectrumRenderer renderer = new BSpectrumRenderer();
+            BEntity en = new BEntity("Halo");
+            en.TargetSpatial.Position = new BVector3(0,0,0);
+
+            BSpectrumRenderer renderer = en.AddComponent<BSpectrumRenderer>();
 
             renderer.targetMaterial = material;
             renderer.targetMesh = mesh;
 
             targetRendererModule.CreateRenderingMesh(mesh);
             targetRendererModule.CreateRenderingMaterial(material);
-            
-            targetRendererModule.CreateRenderingPipeline(renderer);
-
-            BWorld world = new BWorld("My B World");
-            targetWorldModule.RegisterNewWorld(world);
 
             targetRendererModule.RegisterSpectrumRenderer(renderer);
+            targetRendererModule.CreateRenderingPipeline(renderer);
+            
+
+           
 
             while (targetWindowModule.IsWindowActive)
             {

@@ -11,8 +11,9 @@ namespace BEngine.Engine.Modules
         public abstract string ModuleName { get; }
         public abstract void WorldPragma();
         public abstract void RegisterNewWorld(BWorld world);
-      
 
+        public abstract void RegisterEntity(BEntity targetEntity);
+        public abstract void RegisterComponent(BComponent targetComponent);
 
     }
 }

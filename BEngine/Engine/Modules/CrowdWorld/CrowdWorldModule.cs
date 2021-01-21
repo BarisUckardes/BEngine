@@ -9,15 +9,18 @@ namespace BEngine.Engine.Modules
 {
     public class CrowdWorldModule : WorldModule
     {
- 
-        private List<BWorld> registeredWorlds;
         public override string ModuleName => "Crowd World Module";
 
         public BWorld currentWorld;
 
+        private List<BEntity> registeredEntities;
+        private List<BComponent> registeredComponents;
+
         public CrowdWorldModule()
         {
-            registeredWorlds = new List<BWorld>();
+            BEntity.TargetWorldModule = this;
+            BComponent.TargetWorldModule = this;
+            BWorld.TargetWorldModule = this;
         }
         /// <summary>
         /// Registers anew world to the registry
@@ -25,13 +28,7 @@ namespace BEngine.Engine.Modules
         /// <param name="targetWorld"></param>
         public override void RegisterNewWorld(BWorld targetWorld)
         {
-            if(registeredWorlds.Contains(targetWorld))
-            {
-                BConsoleLog.DropLog("World : " + targetWorld.Name + " is already registered!", LogType.Warning);
-                return;
-            }
-            BConsoleLog.DropLog("World : " + targetWorld.Name + " is registered!");
-            registeredWorlds.Add(targetWorld);
+            currentWorld = targetWorld;
         }
 
         /// <summary>
@@ -43,6 +40,13 @@ namespace BEngine.Engine.Modules
          
         }
 
-      
+        public override void RegisterEntity(BEntity targetEntity)
+        {
+            currentWorld.InternalRegisterEntity(targetEntity);
+        }
+        public override void RegisterComponent(BComponent targetComponent)
+        {
+            currentWorld.InternalRegisterComponent(targetComponent);
+        }
     }
 }

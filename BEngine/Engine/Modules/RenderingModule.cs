@@ -15,7 +15,6 @@ namespace BEngine.Engine.Modules
         public abstract void RenderPragma();
         public abstract void RegisterSpectrumRenderer(BSpectrumRenderer targetRenderer);
         public abstract void CreateRenderingMesh(BMesh targetMesh);
-
         public abstract void CreateRenderingMaterial(BMaterial targetMaterial);
 
         public abstract void CreateRenderingPipeline(BSpectrumRenderer targetObserver);
