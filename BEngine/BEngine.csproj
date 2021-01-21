@@ -44,19 +44,24 @@
     <Compile Include="Core\IO\BMeshFileUtility.cs" />
     <Compile Include="Core\IO\BShaderFileUtility.cs" />
     <Compile Include="Core\Presentation\BWindow.cs" />
-    <Compile Include="Core\Presentation\FrameWindow\FrameWindow.cs" />
-    <Compile Include="Core\Presentation\WindowModule.cs" />
+    <Compile Include="Engine\BComponent.cs" />
+    <Compile Include="Engine\BEntity.cs" />
+    <Compile Include="Engine\BWorld.cs" />
+    <Compile Include="Engine\Modules\CrowdWorld\CrowdWorldModule.cs" />
+    <Compile Include="Engine\Modules\FrameWindow\FrameWindowModule.cs" />
+    <Compile Include="Engine\Modules\WindowModule.cs" />
     <Compile Include="Engine\BEngineMonitor.cs" />
     <Compile Include="Engine\BObject.cs" />
-    <Compile Include="Engine\FelinRenderer\FelineRenderer.cs" />
+    <Compile Include="Engine\Modules\FelinRenderer\FelineRendererModule.cs" />
     <Compile Include="Engine\Graphics\BMaterial.cs" />
     <Compile Include="Engine\Graphics\BMesh.cs" />
     <Compile Include="Engine\Graphics\BSpectrumObserver.cs" />
     <Compile Include="Engine\Graphics\BVertex.cs" />
-    <Compile Include="Engine\Graphics\RenderingModule.cs" />
+    <Compile Include="Engine\Modules\RenderingModule.cs" />
     <Compile Include="Engine\IEngineModule.cs" />
     <Compile Include="Engine\Mathematics\BVector2.cs" />
     <Compile Include="Engine\Mathematics\BVector3.cs" />
+    <Compile Include="Engine\Modules\WorldModule.cs" />
     <Compile Include="program.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -249,6 +254,7 @@
       <HintPath>..\packages\Vk.1.0.22\lib\netstandard1.4\vk.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Veldrid.SDL2.4.8.0\build\net40\Veldrid.SDL2.targets" Condition="Exists('..\packages\Veldrid.SDL2.4.8.0\build\net40\Veldrid.SDL2.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

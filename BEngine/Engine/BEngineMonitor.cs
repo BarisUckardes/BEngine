@@ -14,8 +14,6 @@ namespace BEngine.Engine
        /// </summary>
         private List<IEngineModule> RegisteredModules;
 
-     
-
         public BEngineMonitor()
         {
             RegisteredModules = new List<IEngineModule>();

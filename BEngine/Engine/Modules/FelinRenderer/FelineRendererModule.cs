@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using Veldrid;
 using Veldrid.SPIRV;
 
-namespace BEngine.Engine.FelinRenderer
+namespace BEngine.Engine.Modules
 {
-    internal class FelineRenderer : RenderingModule
+    internal class FelineRendererModule : RenderingModule
     {
         
         /// <summary>
@@ -21,7 +21,7 @@ namespace BEngine.Engine.FelinRenderer
         private CommandList targetCommandList;
         public override string ModuleName => "Feline Renderer v0.0.0";
 
-        private List<BSpectrumRenderer> RegisteredRenderers;
+        List<BSpectrumRenderer> registeredRenderers;
 
         /// <summary>
         /// Inits FelineRenderer
@@ -33,30 +33,32 @@ namespace BEngine.Engine.FelinRenderer
             this.targetResourceFactory = this.targetDevice.ResourceFactory;
             this.targetCommandList = this.targetResourceFactory.CreateCommandList();
 
-            RegisteredRenderers = new List<BSpectrumRenderer>();
+            registeredRenderers = new List<BSpectrumRenderer>();
         }
 
         /// <summary>
-        /// FelineRenderer loop
+        /// Renders the target world
         /// </summary>
-        public override void Run()
+        public override void RenderPragma()
         {
+
             targetCommandList.Begin();
             targetCommandList.SetFramebuffer(targetDevice.SwapchainFramebuffer);
             targetCommandList.ClearColorTarget(0, RgbaFloat.Blue);
 
-            for(int i=0;i<RegisteredRenderers.Count;i++)
+            for(int i=0;i< registeredRenderers.Count;i++)
             {
-                targetCommandList.SetVertexBuffer(0, RegisteredRenderers[i].targetMesh.targetVertexBuffer);
-                targetCommandList.SetIndexBuffer(RegisteredRenderers[i].targetMesh.targetIndexBuffer,IndexFormat.UInt32);
-                targetCommandList.SetPipeline(RegisteredRenderers[i].targetPipeline);
+                targetCommandList.SetVertexBuffer(0, registeredRenderers[i].targetMesh.targetVertexBuffer);
+                targetCommandList.SetIndexBuffer(registeredRenderers[i].targetMesh.targetIndexBuffer,IndexFormat.UInt32);
+                targetCommandList.SetPipeline(registeredRenderers[i].targetPipeline);
                 targetCommandList.DrawIndexed(
-                    indexCount : (uint)RegisteredRenderers[i].targetMesh.Indexes.Length,
+                    indexCount : (uint)registeredRenderers[i].targetMesh.Indexes.Length,
                     instanceCount : 1,
                     indexStart : 0,
                     vertexOffset : 0,
                     instanceStart : 0);
             }
+
             targetCommandList.End();
             targetDevice.SubmitCommands(targetCommandList);
             targetDevice.SwapBuffers();
@@ -147,9 +149,15 @@ namespace BEngine.Engine.FelinRenderer
 
         }
 
-        public override void RegisterSpectrumObserver(BSpectrumRenderer targetRenderer)
+        /// <summary>
+        /// Registers renderable
+        /// </summary>
+        /// <param name="targetRenderer">target renderable object</param>
+        public override void RegisterSpectrumRenderer(BSpectrumRenderer targetRenderer)
         {
-            RegisteredRenderers.Add(targetRenderer);
+            registeredRenderers.Add(targetRenderer);
         }
+     
+       
     }
 }

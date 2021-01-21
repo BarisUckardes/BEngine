@@ -1,16 +1,17 @@
-﻿using System;
+﻿using BEngine.Core.Presentation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Veldrid.Sdl2;
 
-namespace BEngine.Core.Presentation.FrameWindow
+namespace BEngine.Engine.Modules
 {
     /// <summary>
     /// Window module, controls window events and inputs
     /// </summary>
-    internal class FrameWindow : WindowModule
+    internal class FrameWindowModule : WindowModule
     {
         /// <summary>
         /// Target Native SDL window
@@ -31,7 +32,7 @@ namespace BEngine.Core.Presentation.FrameWindow
         /// <summary>
         /// Runs FrameWindow module Loop
         /// </summary>
-        public override  void Run()
+        public override void WindowPragma()
         {
             targetWindow.PumpEvents();
         }

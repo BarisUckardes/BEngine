@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace BEngine.Engine
 {
-    public interface IEngineModule
+    sealed public class BEntity : BObject
     {
-        string ModuleName { get; }
+
     }
 }

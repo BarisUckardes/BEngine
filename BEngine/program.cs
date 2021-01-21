@@ -7,18 +7,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Veldrid.Sdl2;
-using BEngine.Engine.FelinRenderer;
-using BEngine.Core.Presentation.FrameWindow;
-using BEngine.Engine.Graphics;
-using BEngine.Core.ConsoleDebug;
 using Veldrid;
+using Veldrid.Sdl2;
+using BEngine.Engine.Graphics;
+using BEngine.Engine.Modules;
 
 namespace BEngine
 {
     class program
     {
-
         static int Main()
         {
             BWindow bWindow = new BWindow(new BVector2(512,512));
@@ -27,11 +24,13 @@ namespace BEngine
 
             BEngineMonitor engineMonitor = new BEngineMonitor();
 
-            engineMonitor.RegisterModule<FrameWindow>();
-            engineMonitor.RegisterModule<FelineRenderer>();
+            engineMonitor.RegisterModule<FrameWindowModule>();
+            engineMonitor.RegisterModule<FelineRendererModule>();
+            engineMonitor.RegisterModule<CrowdWorldModule>();
 
             RenderingModule targetRendererModule = engineMonitor.GetEngineModule<RenderingModule>();
             WindowModule targetWindowModule = engineMonitor.GetEngineModule<WindowModule>();
+            WorldModule targetWorldModule = engineMonitor.GetEngineModule<WorldModule>();
 
             targetRendererModule.InitRenderingModule(bWindow.GetDevice());
             targetWindowModule.InitWindowModule(window);
@@ -53,15 +52,17 @@ namespace BEngine
             
             targetRendererModule.CreateRenderingPipeline(renderer);
 
-            targetRendererModule.RegisterSpectrumObserver(renderer);
+            BWorld world = new BWorld("My B World");
+            targetWorldModule.RegisterNewWorld(world);
+
+            targetRendererModule.RegisterSpectrumRenderer(renderer);
 
             while (targetWindowModule.IsWindowActive)
             {
-                targetWindowModule.Run();
-                targetRendererModule.Run();
+                targetWindowModule.WindowPragma();
+                targetRendererModule.RenderPragma();
             }
-          
-
+      
             return -1;
         }
     }

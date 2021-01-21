@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace BEngine.Engine
 {
-    public interface IEngineModule
+    public class BComponent : BObject
     {
-        string ModuleName { get; }
+        public virtual void Setup() { }
+        public virtual void LogicUpdate() { }
     }
 }

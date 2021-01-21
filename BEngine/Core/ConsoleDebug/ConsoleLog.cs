@@ -23,13 +23,13 @@ namespace BEngine.Core.ConsoleDebug
                     break;
 
                 case LogType.Warning:
-                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("Warning: " + log);
                     Console.ForegroundColor = formerColor;
                     break;
 
                 case LogType.Error:
-                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Error: " + log);
                     Console.ForegroundColor = formerColor;
                     break;

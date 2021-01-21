@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace BEngine.Engine
 {
-    public interface IEngineModule
+    public class BWorld : BObject
     {
-        string ModuleName { get; }
+
+        public BWorld(string name)
+        {
+            Name = name;
+        }
     }
 }
