@@ -10,12 +10,12 @@ namespace BEngine.Engine.Graphics
     public struct BVertex
     {
         public BVector3 Position;
-        public BVector3 VertexColor;
+        public BVector2 UV;
 
-        public BVertex(BVector3 position, BVector3 vertexColor)
+        public BVertex(BVector3 position, BVector2 uv)
         {
             Position = position;
-            VertexColor = vertexColor;
+            UV = uv;
         }
     }
 }

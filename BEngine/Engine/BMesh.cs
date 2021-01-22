@@ -1,4 +1,5 @@
 ﻿using BEngine.Engine.Graphics;
+using BEngine.Engine.Modules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace BEngine.Engine
 {
     public class BMesh
     {
+        internal static RenderingModule TargetRenderingModule { get; set; }
         /// <summary>
         /// Mesh GPU variables
         /// </summary>
@@ -22,5 +24,10 @@ namespace BEngine.Engine
         /// </summary>
         public BVertex[] Vertexes;
         public uint[] Indexes;
+
+        public void ApplyMesh()
+        {
+            TargetRenderingModule.CreateRenderingMesh(this);
+        }
     }
 }

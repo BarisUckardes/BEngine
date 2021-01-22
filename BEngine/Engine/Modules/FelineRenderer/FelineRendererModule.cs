@@ -1,4 +1,5 @@
 ﻿using BEngine.Core.ConsoleDebug;
+using BEngine.Core.IO;
 using BEngine.Engine.Graphics;
 using BEngine.Engine.Mathematics;
 using System;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Veldrid;
 using Veldrid.SPIRV;
+using Veldrid.ImageSharp;
 
 namespace BEngine.Engine.Modules.FelineRenderer
 {
@@ -24,6 +26,7 @@ namespace BEngine.Engine.Modules.FelineRenderer
         public override string ModuleName => "Feline Renderer v0.0.0";
 
         List<BSpectrumRenderer> registeredRenderers;
+        List<BSpectrumObserver> registeredObservers;
 
         /// <summary>
         /// Inits FelineRenderer
@@ -36,6 +39,13 @@ namespace BEngine.Engine.Modules.FelineRenderer
             this.targetCommandList = this.targetResourceFactory.CreateCommandList();
 
             registeredRenderers = new List<BSpectrumRenderer>();
+            registeredObservers = new List<BSpectrumObserver>();
+
+            BSpectrumObserver.TargetRenderingModule = this;
+            BSpectrumRenderer.TargetRenderingModule = this;
+            BMesh.TargetRenderingModule = this;
+            BMaterial.TargetRenderingModule = this;
+            BTextureFileUtility.TargetRenderingModule = this;
         }
 
         /// <summary>
@@ -48,6 +58,7 @@ namespace BEngine.Engine.Modules.FelineRenderer
             targetCommandList.SetFramebuffer(targetDevice.SwapchainFramebuffer);
             targetCommandList.ClearColorTarget(0, RgbaFloat.Blue);
 
+            BSpectrumObserver targetObserver = registeredObservers[0];
             /*
              * Loop through every registered renderers
              */
@@ -60,40 +71,39 @@ namespace BEngine.Engine.Modules.FelineRenderer
                 /*
                  * Check if this renderable needs his spatial buffer to be updated
                  */
-                if (targetSpatial.IsDirty)
+                if (targetSpatial.IsDirty || targetObserver.IsDirty)
                 {
-                    
-                    targetSpatial.ModelMatrix =
+                    targetObserver.ProjectionMatrix =
+                        targetObserver.IsDirty ?
+                        Matrix4x4.CreatePerspectiveFieldOfView(targetObserver.FieldOfView, targetObserver.AspectRatio, targetObserver.NearClipPlane, targetObserver.FarClipPlane) :
+                        targetObserver.ProjectionMatrix;
+
+                    targetObserver.ViewMatrix = Matrix4x4.CreateLookAt(
+                    new Vector3(targetObserver.TargetSpatial.Position.x, targetObserver.TargetSpatial.Position.y, targetObserver.TargetSpatial.Position.z),
+                    new Vector3(targetObserver.TargetSpatial.Position.x, targetObserver.TargetSpatial.Position.y, targetObserver.TargetSpatial.Position.z - 1),
+                    new Vector3(0, 1, 0));
+
+
+                   targetSpatial.ModelMatrix = targetSpatial.ModelMatrix =
                         Matrix4x4.CreateRotationX(targetSpatial.Rotation.x)*
                         Matrix4x4.CreateRotationY(targetSpatial.Rotation.y)*
                         Matrix4x4.CreateRotationZ(targetSpatial.Rotation.z)*
                         Matrix4x4.CreateScale(targetSpatial.Scale.x,targetSpatial.Scale.y,targetSpatial.Scale.z)*
                         Matrix4x4.CreateTranslation(targetSpatial.Position.x,targetSpatial.Position.y,targetSpatial.Position.z);
 
-                    Matrix4x4 projectionMatrix =
-                    Matrix4x4.CreatePerspectiveFieldOfView(
-                      1.0f,
-                      1.0f,
-                      0.001f,
-                      100000.0f
-                     );
-                    Matrix4x4 viewMatrix =
-                        Matrix4x4.CreateLookAt(
-                            new Vector3(0, 0, 5),
-                            new Vector3(0, 0, 0),
-                            new Vector3(0, 1, 0)
-                    );
-
-                    Matrix4x4 MVP = targetSpatial.ModelMatrix * viewMatrix * projectionMatrix;
+                
+                    Matrix4x4 MVP = targetSpatial.ModelMatrix * targetObserver.ViewMatrix * targetObserver.ProjectionMatrix;
                     targetDevice.UpdateBuffer(targetRenderer.targetMVPBuffer.targetDeviceBuffer, 0, MVP);
 
-                    targetSpatial.IsDirty = false;
+                    targetSpatial.IsDirty = targetSpatial.IsDirty ? false : false;
+                    targetObserver.IsDirty = targetObserver.IsDirty ? false : false;
                 }
 
                 
                 targetCommandList.SetPipeline(targetRenderer.targetPipeline);
 
                 targetCommandList.SetGraphicsResourceSet(0, targetRenderer.targetMVPBuffer.targetResourceSet);
+                targetCommandList.SetGraphicsResourceSet(1, targetRenderer.targetMaterial.tex.targetResourceSet);
 
    
                 targetCommandList.SetVertexBuffer(0, targetRenderer.targetMesh.targetVertexBuffer);
@@ -118,7 +128,7 @@ namespace BEngine.Engine.Modules.FelineRenderer
         /// <param name="targetMesh">Target mesh which needs to be created on GPU</param>
         public override void CreateRenderingMesh(BMesh targetMesh)
         {
-            DeviceBuffer vertexBuffer = targetResourceFactory.CreateBuffer(new BufferDescription((uint)targetMesh.Vertexes.Length*(24),BufferUsage.VertexBuffer));
+            DeviceBuffer vertexBuffer = targetResourceFactory.CreateBuffer(new BufferDescription((uint)targetMesh.Vertexes.Length*(20),BufferUsage.VertexBuffer));
             DeviceBuffer indexBuffer = targetResourceFactory.CreateBuffer(new BufferDescription((uint)targetMesh.Indexes.Length * sizeof(uint), BufferUsage.IndexBuffer));
 
             targetDevice.UpdateBuffer(vertexBuffer, 0, targetMesh.Vertexes);
@@ -126,7 +136,7 @@ namespace BEngine.Engine.Modules.FelineRenderer
 
             VertexLayoutDescription vertexLayout = new VertexLayoutDescription(
                 new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
-                new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3));
+                new VertexElementDescription("UV", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2));
 
             targetMesh.targetVertexBuffer = vertexBuffer;
             targetMesh.targetIndexBuffer = indexBuffer;
@@ -158,7 +168,7 @@ namespace BEngine.Engine.Modules.FelineRenderer
         /// Creates a pipeline on GPU side
         /// </summary>
         /// <param name="targetObserver">target observer which is currently rendering</param>
-        public override void CreateRenderingPipeline(BSpectrumRenderer targetObserver)
+        public override void CreateRenderingPipeline(BSpectrumRenderer targetRenderer)
         {
            
 
@@ -184,17 +194,17 @@ namespace BEngine.Engine.Modules.FelineRenderer
             gpDescription.ResourceLayouts = System.Array.Empty<ResourceLayout>();
 
             gpDescription.ShaderSet = new ShaderSetDescription(
-                vertexLayouts:new VertexLayoutDescription[] {targetObserver.targetMesh.targetVertexLayout},
-                shaders : targetObserver.targetMaterial.targetShaders
+                vertexLayouts:new VertexLayoutDescription[] { targetRenderer.targetMesh.targetVertexLayout},
+                shaders : targetRenderer.targetMaterial.targetShaders
                 );
 
             gpDescription.Outputs = targetDevice.SwapchainFramebuffer.OutputDescription;
 
-            gpDescription.ResourceLayouts = new ResourceLayout[] { targetObserver.targetMVPBuffer.targetLayout};
+            gpDescription.ResourceLayouts = new ResourceLayout[] { targetRenderer.targetMVPBuffer.targetLayout,targetRenderer.targetMaterial.tex.targetLayout};
             
             Pipeline pipeline = targetResourceFactory.CreateGraphicsPipeline(gpDescription);
 
-            targetObserver.targetPipeline = pipeline;
+            targetRenderer.targetPipeline = pipeline;
 
         }
 
@@ -241,7 +251,34 @@ namespace BEngine.Engine.Modules.FelineRenderer
 
             registeredRenderers.Add(targetRenderer);
         }
-     
-       
+
+        public override void RegisterSpectrumObserver(BSpectrumObserver targetObserver)
+        {
+            registeredObservers.Add(targetObserver);
+        }
+
+        public override BTexture2D CreateTexture2D(ImageSharpTexture isTexture)
+        {
+            BTexture2D texture = new BTexture2D();
+
+            texture.targetTexture = isTexture.CreateDeviceTexture(this.targetDevice, this.targetResourceFactory);
+            texture.targetView = this.targetResourceFactory.CreateTextureView(texture.targetTexture);
+
+            ResourceLayout textureResourceLayout = this.targetResourceFactory.CreateResourceLayout(
+                new ResourceLayoutDescription(
+                    new ResourceLayoutElementDescription("testTexture", ResourceKind.TextureReadOnly,ShaderStages.Fragment),
+                    new ResourceLayoutElementDescription("testTextureSampler", ResourceKind.Sampler,ShaderStages.Fragment)
+                    )
+                );
+            ResourceSet textureResourceSet = this.targetResourceFactory.CreateResourceSet(new ResourceSetDescription(
+                textureResourceLayout,texture.targetView,this.targetDevice.Aniso4xSampler
+                )
+                );
+
+            texture.targetLayout = textureResourceLayout;
+            texture.targetResourceSet = textureResourceSet;
+
+            return texture;
+        }
     }
 }

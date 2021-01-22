@@ -67,10 +67,10 @@ namespace BEngine.Core.IO
                         float.Parse(fragments[1]),
                         float.Parse(fragments[2])),
 
-                        new BVector3(
+                        new BVector2(
                         float.Parse(fragments[3]),
-                        float.Parse(fragments[4]),
-                        float.Parse(fragments[5])));
+                        float.Parse(fragments[4])
+                        ));
 
                     vertIndex++;
                 }

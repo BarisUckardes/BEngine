@@ -36,6 +36,7 @@ namespace BEngine
             targetRendererModule.InitRenderingModule(bWindow.GetDevice());
             targetWindowModule.InitWindowModule(window);
 
+            BTexture2D testTexture = BTextureFileUtility.Load2DTextureFromFile(@"D:\BEngine\Textures\BEngine_TestTexture.jpg");
             BWorld world = new BWorld("My B World");
 
             string vertexShader = BShaderFileUtility.LoadShaderFile(@"D:\BEngine\Shaders\TestVertexShader.bvs");
@@ -43,23 +44,23 @@ namespace BEngine
 
             BMesh mesh = BMeshFileUtility.LoadFileVertexes(@"D:\BEngine\Shaders\TestMesh.bmesh");
             BMaterial material = new BMaterial(vertexShader,fragmentShader);
+            material.tex = testTexture;
+            mesh.ApplyMesh();
+            material.ApplyMaterial();
 
             BEntity en = new BEntity("Halo");
-            en.TargetSpatial.Position = new BVector3(0,0,0);
+            en.TargetSpatial.Position = new BVector3(0,0,-5);
 
             BSpectrumRenderer renderer = en.AddComponent<BSpectrumRenderer>();
 
             renderer.targetMaterial = material;
             renderer.targetMesh = mesh;
-
-            targetRendererModule.CreateRenderingMesh(mesh);
-            targetRendererModule.CreateRenderingMaterial(material);
-
-            targetRendererModule.RegisterSpectrumRenderer(renderer);
-            targetRendererModule.CreateRenderingPipeline(renderer);
+            renderer.ApplyRenderer();
             
 
-           
+            BEntity observer = new BEntity("Observer Enttiy");
+            observer.TargetSpatial.Position = new BVector3(0, 0, 5);
+            observer.AddComponent<BSpectrumObserver>();
 
             while (targetWindowModule.IsWindowActive)
             {
