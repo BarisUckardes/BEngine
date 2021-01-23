@@ -66,23 +66,45 @@ namespace BEngine.Engine.Modules.FelineRenderer
             {
                 BSpectrumRenderer targetRenderer = registeredRenderers[i];
                 BSpatial targetSpatial = targetRenderer.TargetSpatial;
-                targetSpatial.Rotation = new BVector3(0,b,0);
-                b+=0.00025f;
+                //targetSpatial.Rotation = new BVector3(0, b, 0);
+                //b += 0.00025f;
+                if(BInput.IsKeyHold(Key.D))
+                {
+                    targetObserver.TargetSpatial.Position = new BVector3(targetObserver.TargetSpatial.Position.x+0.001f, targetObserver.TargetSpatial.Position.y, targetObserver.TargetSpatial.Position.z);
+                }
+                if (BInput.IsKeyHold(Key.A))
+                {
+                    targetObserver.TargetSpatial.Position = new BVector3(targetObserver.TargetSpatial.Position.x - 0.001f, targetObserver.TargetSpatial.Position.y, targetObserver.TargetSpatial.Position.z);
+                }
+                if (BInput.IsKeyHold(Key.W))
+                {
+                    targetObserver.TargetSpatial.Position = new BVector3(targetObserver.TargetSpatial.Position.x, targetObserver.TargetSpatial.Position.y, targetObserver.TargetSpatial.Position.z- 0.001f);
+                }
+                if (BInput.IsKeyHold(Key.S))
+                {
+                    targetObserver.TargetSpatial.Position = new BVector3(targetObserver.TargetSpatial.Position.x, targetObserver.TargetSpatial.Position.y, targetObserver.TargetSpatial.Position.z+ 0.001f);
+                }
+
+
                 /*
                  * Check if this renderable needs his spatial buffer to be updated
                  */
-                if (targetSpatial.IsDirty || targetObserver.IsDirty)
+                if (targetSpatial.IsDirty || targetObserver.IsDirty || targetObserver.TargetSpatial.IsDirty)
                 {
-                    targetObserver.ProjectionMatrix =
-                        targetObserver.IsDirty ?
-                        Matrix4x4.CreatePerspectiveFieldOfView(targetObserver.FieldOfView, targetObserver.AspectRatio, targetObserver.NearClipPlane, targetObserver.FarClipPlane) :
-                        targetObserver.ProjectionMatrix;
+                    if(targetObserver.IsDirty)
+                    {
+                        targetObserver.ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(targetObserver.FieldOfView, targetObserver.AspectRatio, targetObserver.NearClipPlane, targetObserver.FarClipPlane);
+                        targetObserver.IsDirty = false;
+                    }
 
-                    targetObserver.ViewMatrix = Matrix4x4.CreateLookAt(
+                    if(targetObserver.TargetSpatial.IsDirty)
+                    {
+                        targetObserver.ViewMatrix = Matrix4x4.CreateLookAt(
                     new Vector3(targetObserver.TargetSpatial.Position.x, targetObserver.TargetSpatial.Position.y, targetObserver.TargetSpatial.Position.z),
                     new Vector3(targetObserver.TargetSpatial.Position.x, targetObserver.TargetSpatial.Position.y, targetObserver.TargetSpatial.Position.z - 1),
                     new Vector3(0, 1, 0));
-
+                        targetObserver.TargetSpatial.IsDirty = false;
+                    }
 
                    targetSpatial.ModelMatrix = targetSpatial.ModelMatrix =
                         Matrix4x4.CreateRotationX(targetSpatial.Rotation.x)*
@@ -91,12 +113,12 @@ namespace BEngine.Engine.Modules.FelineRenderer
                         Matrix4x4.CreateScale(targetSpatial.Scale.x,targetSpatial.Scale.y,targetSpatial.Scale.z)*
                         Matrix4x4.CreateTranslation(targetSpatial.Position.x,targetSpatial.Position.y,targetSpatial.Position.z);
 
-                
+
                     Matrix4x4 MVP = targetSpatial.ModelMatrix * targetObserver.ViewMatrix * targetObserver.ProjectionMatrix;
                     targetDevice.UpdateBuffer(targetRenderer.targetMVPBuffer.targetDeviceBuffer, 0, MVP);
 
                     targetSpatial.IsDirty = targetSpatial.IsDirty ? false : false;
-                    targetObserver.IsDirty = targetObserver.IsDirty ? false : false;
+
                 }
 
                 
@@ -115,8 +137,6 @@ namespace BEngine.Engine.Modules.FelineRenderer
                     targetCommandList.SetGraphicsResourceSet((uint)(1+p), targetRenderer.TargetMaterial.ParameterMap.ElementAt(p).Value.targetResourceSet);
                 }
                
-                
-   
                 targetCommandList.SetVertexBuffer(0, targetRenderer.TargetMesh.targetVertexBuffer);
                 targetCommandList.SetIndexBuffer(targetRenderer.TargetMesh.targetIndexBuffer,IndexFormat.UInt32);
                 targetCommandList.SetPipeline(targetRenderer.targetPipeline);

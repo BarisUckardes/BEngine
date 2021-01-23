@@ -47,12 +47,15 @@
     <Compile Include="Core\Presentation\BWindow.cs" />
     <Compile Include="Engine\BComponent.cs" />
     <Compile Include="Engine\BEntity.cs" />
+    <Compile Include="Engine\BInput.cs" />
+    <Compile Include="Engine\BKeyState.cs" />
     <Compile Include="Engine\BSpatial.cs" />
     <Compile Include="Engine\BSpectrumObserver.cs" />
     <Compile Include="Engine\BWorld.cs" />
     <Compile Include="Engine\Graphics\BGraphicsResource.cs" />
     <Compile Include="Engine\Graphics\BMatrix4x4.cs" />
     <Compile Include="Engine\Graphics\BRenderTexture2D.cs" />
+    <Compile Include="Engine\Graphics\BShaderGroup.cs" />
     <Compile Include="Engine\Graphics\BTexture.cs" />
     <Compile Include="Engine\Graphics\BTexture2D.cs" />
     <Compile Include="Engine\Graphics\BUniformBuffer.cs" />

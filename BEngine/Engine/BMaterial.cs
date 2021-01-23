@@ -26,42 +26,7 @@ namespace BEngine.Engine
         private List<BSpectrumRenderer> RegisteredRenderers;
         public Dictionary<string, BGraphicsResource> ParameterMap { get; private set; }
 
-        internal void RegisterRendererInternal(BSpectrumRenderer targetRenderer)
-        {
-            RegisteredRenderers.Add(targetRenderer);
-        }
-        public void RegisterTexture2DParameter(string parameterName)
-        {
-            if(ParameterMap.ContainsKey(parameterName))
-            {
-                BConsoleLog.DropLog("Parameter[" + parameterName + "] is already registered!", LogType.Warning);
-                return;
-            }
-
-            ParameterMap.Add(parameterName, null);
-
-            /*
-             * Update all renderers
-             */
-            for(int i=0;i<RegisteredRenderers.Count;i++)
-            {
-                TargetRenderingModule.CreateRenderingPipeline(RegisteredRenderers[i]);
-            }
-
-        }
-        public void SetParameterTexture2D(string parameterName, BTexture2D targetTexture)
-        {
-            if (!ParameterMap.ContainsKey(parameterName))
-            {
-                BConsoleLog.DropLog("Parameter[" + parameterName + "] is not registered!", LogType.Warning);
-                return;
-            }
-
-            ParameterMap[parameterName] = targetTexture;
-
-        }
-
-        public BMaterial(string vertexCode,string fragmentCode)
+        public BMaterial(string vertexCode, string fragmentCode)
         {
             targetVertexShader = vertexCode;
             targetFragmentShader = fragmentCode;
@@ -69,10 +34,59 @@ namespace BEngine.Engine
             RegisteredRenderers = new List<BSpectrumRenderer>();
         }
 
+        internal void RegisterRendererInternal(BSpectrumRenderer targetRenderer)
+        {
+            RegisteredRenderers.Add(targetRenderer);
+        }
+        internal void RegisterParameterMapInteral(Dictionary<string,BGraphicsResource> targetParameterMap)
+        {
+            for(int i=0;i<targetParameterMap.Count;i++)
+            {
+                ParameterMap.Add(targetParameterMap.ElementAt(i).Key, targetParameterMap.ElementAt(i).Value);
+            }
+            UpdateAllRenderers();
+        }
+      
+        public void SetParameterTexture2D(string parameterName, BTexture2D targetTexture)
+        {
+            if (!ParameterMap.ContainsKey(parameterName))
+            {
+                ParameterMap.Add(parameterName, targetTexture);
+                UpdateAllRenderers();
+                
+            }
+            else
+            {
+                ParameterMap[parameterName] = targetTexture;
+            }
+        }
+       
+        private void UpdateAllRenderers()
+        {
+            /*
+            * Update all renderers
+            */
+            for (int i = 0; i < RegisteredRenderers.Count; i++)
+            {
+                TargetRenderingModule.CreateRenderingPipeline(RegisteredRenderers[i]);
+            }
+        }
+
         public void ApplyMaterial()
         {
             TargetRenderingModule.CreateRenderingMaterial(this);
         }
-            
+        public BMaterial CopyMaterial()
+        {
+            BMaterial bMaterial = new BMaterial(targetVertexShader,targetFragmentShader);
+
+            bMaterial.RegisterParameterMapInteral(this.ParameterMap);
+            bMaterial.targetShaders = this.targetShaders;
+
+            return bMaterial;
+        }
+
+        
+
     }
 }

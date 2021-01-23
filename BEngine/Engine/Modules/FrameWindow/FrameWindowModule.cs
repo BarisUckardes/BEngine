@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Veldrid;
 using Veldrid.Sdl2;
 
 namespace BEngine.Engine.Modules
@@ -27,8 +28,18 @@ namespace BEngine.Engine.Modules
         public override void InitWindowModule(Sdl2Window targetWindow)
         {
             this.targetWindow = targetWindow;
+            targetWindow.KeyDown += OnKeyDown;
+            targetWindow.KeyUp += OnKeyUp;
         }
 
+        private void OnKeyDown(KeyEvent downEvent)
+        {
+            BInput.SetKeyStateInternal(downEvent.Key, BKeyState.Hold);
+        }
+        private void OnKeyUp(KeyEvent upEvent)
+        {
+            BInput.SetKeyStateInternal(upEvent.Key, BKeyState.Up);
+        }
         /// <summary>
         /// Runs FrameWindow module Loop
         /// </summary>
