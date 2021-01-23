@@ -67,7 +67,7 @@ namespace BEngine.Engine.Modules.FelineRenderer
                 BSpectrumRenderer targetRenderer = registeredRenderers[i];
                 BSpatial targetSpatial = targetRenderer.TargetSpatial;
                 targetSpatial.Rotation = new BVector3(0,b,0);
-                b+=0.001f;
+                b+=0.00025f;
                 /*
                  * Check if this renderable needs his spatial buffer to be updated
                  */
@@ -102,15 +102,26 @@ namespace BEngine.Engine.Modules.FelineRenderer
                 
                 targetCommandList.SetPipeline(targetRenderer.targetPipeline);
 
+                /*
+                 * Set feline renderer's pre-determined resources
+                 */
                 targetCommandList.SetGraphicsResourceSet(0, targetRenderer.targetMVPBuffer.targetResourceSet);
-                targetCommandList.SetGraphicsResourceSet(1, targetRenderer.targetMaterial.tex.targetResourceSet);
 
+                /*
+                 * Set parameter map of the material
+                 */
+                for(int p=0;p<targetRenderer.TargetMaterial.ParameterMap.Count;p++)
+                {
+                    targetCommandList.SetGraphicsResourceSet((uint)(1+p), targetRenderer.TargetMaterial.ParameterMap.ElementAt(p).Value.targetResourceSet);
+                }
+               
+                
    
-                targetCommandList.SetVertexBuffer(0, targetRenderer.targetMesh.targetVertexBuffer);
-                targetCommandList.SetIndexBuffer(targetRenderer.targetMesh.targetIndexBuffer,IndexFormat.UInt32);
+                targetCommandList.SetVertexBuffer(0, targetRenderer.TargetMesh.targetVertexBuffer);
+                targetCommandList.SetIndexBuffer(targetRenderer.TargetMesh.targetIndexBuffer,IndexFormat.UInt32);
                 targetCommandList.SetPipeline(targetRenderer.targetPipeline);
                 targetCommandList.DrawIndexed(
-                    indexCount : (uint)targetRenderer.targetMesh.Indexes.Length,
+                    indexCount : (uint)targetRenderer.TargetMesh.Indexes.Length,
                     instanceCount : 1,
                     indexStart : 0,
                     vertexOffset : 0,
@@ -171,7 +182,10 @@ namespace BEngine.Engine.Modules.FelineRenderer
         public override void CreateRenderingPipeline(BSpectrumRenderer targetRenderer)
         {
            
-
+            if(targetRenderer.targetPipeline != null)
+            {
+                targetRenderer.targetPipeline.Dispose();
+            }
             GraphicsPipelineDescription gpDescription = new GraphicsPipelineDescription();
 
             gpDescription.BlendState = BlendStateDescription.SingleOverrideBlend;
@@ -191,20 +205,29 @@ namespace BEngine.Engine.Modules.FelineRenderer
                 );
 
             gpDescription.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            gpDescription.ResourceLayouts = System.Array.Empty<ResourceLayout>();
 
             gpDescription.ShaderSet = new ShaderSetDescription(
-                vertexLayouts:new VertexLayoutDescription[] { targetRenderer.targetMesh.targetVertexLayout},
-                shaders : targetRenderer.targetMaterial.targetShaders
+                vertexLayouts:new VertexLayoutDescription[] { targetRenderer.TargetMesh.targetVertexLayout},
+                shaders : targetRenderer.TargetMaterial.targetShaders
                 );
 
             gpDescription.Outputs = targetDevice.SwapchainFramebuffer.OutputDescription;
 
-            gpDescription.ResourceLayouts = new ResourceLayout[] { targetRenderer.targetMVPBuffer.targetLayout,targetRenderer.targetMaterial.tex.targetLayout};
+            List<ResourceLayout> layouts = new List<ResourceLayout>();
+            layouts.Add(targetRenderer.targetMVPBuffer.targetLayout);
+
+            for(int i=0;i<targetRenderer.TargetMaterial.ParameterMap.Count;i++)
+            {
+                layouts.Add(targetRenderer.TargetMaterial.ParameterMap.ElementAt(i).Value.targetLayout);
+            }
+
+            gpDescription.ResourceLayouts = layouts.ToArray();
             
             Pipeline pipeline = targetResourceFactory.CreateGraphicsPipeline(gpDescription);
 
             targetRenderer.targetPipeline = pipeline;
+
+            BConsoleLog.DropLog("New Pipeline Created!");
 
         }
 

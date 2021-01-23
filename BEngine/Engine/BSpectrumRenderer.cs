@@ -13,10 +13,44 @@ namespace BEngine.Engine
         internal static RenderingModule TargetRenderingModule { get; set; }
         internal Pipeline targetPipeline;
         internal BUniformBuffer targetMVPBuffer;
-      
 
-        public BMesh targetMesh;
-        public BMaterial targetMaterial;
+        private BMesh _targetMesh;
+        private BMaterial _targetMaterial;
+
+        public BMesh TargetMesh
+        {
+            get
+            {
+                return _targetMesh;
+            }
+            set
+            {
+                _targetMesh = value;
+
+                if(_targetMesh !=null && _targetMaterial !=null)
+                {
+                    TargetRenderingModule.CreateRenderingPipeline(this);
+                }
+            }
+        }
+        public BMaterial TargetMaterial
+        {
+            get
+            {
+                return _targetMaterial;
+            }
+            set
+            {
+                _targetMaterial = value;
+                _targetMaterial.RegisterRendererInternal(this);
+
+                if (_targetMesh != null && _targetMaterial != null)
+                {
+                    TargetRenderingModule.CreateRenderingPipeline(this);
+                }
+            }
+        }
+
 
         public BSpectrumRenderer()
         {

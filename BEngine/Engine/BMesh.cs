@@ -25,7 +25,7 @@ namespace BEngine.Engine
         public BVertex[] Vertexes;
         public uint[] Indexes;
 
-        public void ApplyMesh()
+        public void BuildMesh()
         {
             TargetRenderingModule.CreateRenderingMesh(this);
         }

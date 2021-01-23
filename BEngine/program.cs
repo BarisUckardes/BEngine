@@ -44,18 +44,18 @@ namespace BEngine
 
             BMesh mesh = BMeshFileUtility.LoadFileVertexes(@"D:\BEngine\Shaders\TestMesh.bmesh");
             BMaterial material = new BMaterial(vertexShader,fragmentShader);
-            material.tex = testTexture;
-            mesh.ApplyMesh();
+            material.RegisterTexture2DParameter("myTexture");
+            material.SetParameterTexture2D("myTexture", testTexture);
+            mesh.BuildMesh();
             material.ApplyMaterial();
 
             BEntity en = new BEntity("Halo");
-            en.TargetSpatial.Position = new BVector3(0,0,-5);
+            en.TargetSpatial.Position = new BVector3(0,0,2.5f);
 
             BSpectrumRenderer renderer = en.AddComponent<BSpectrumRenderer>();
-
-            renderer.targetMaterial = material;
-            renderer.targetMesh = mesh;
-            renderer.ApplyRenderer();
+            renderer.TargetMaterial = material;
+            renderer.TargetMesh = mesh;
+            
             
 
             BEntity observer = new BEntity("Observer Enttiy");
